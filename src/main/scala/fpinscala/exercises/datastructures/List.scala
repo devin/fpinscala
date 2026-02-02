@@ -128,6 +128,21 @@ object List: // `List` companion object. Contains functions for creating and wor
   def zipWith[A, B, C](a: List[A], b: List[B], f: (A, B) => C): List[C] = (a, b) match
     case (_, Nil) => Nil
     case (Nil, _) => Nil
-    case (Cons(ah, at), Cons(bh, bt)) => Cons(f(ah, bh), zipWith(at, bt))
+    case (Cons(ah, at), Cons(bh, bt)) => Cons(f(ah, bh), zipWith(at, bt, f))
 
-  def hasSubsequence[A](sup: List[A], sub: List[A]): Boolean = ???
+  def startsWith[A](sup: List[A], sub: List[A]): Boolean = (sup, sub) match
+    case (_, Nil) => true
+    case (Nil, _) => false
+    case (Cons(sup_h, sup_t), Cons(sub_h, sub_t)) =>
+      if sup_h == sub_h then
+        startsWith(sup_t, sub_t)
+      else
+        false
+
+  def hasSubsequence[A](sup: List[A], sub: List[A]): Boolean =
+    if startsWith(sup, sub) then
+      return true
+    else
+      sup match
+        case Nil => false
+        case Cons(h, t) => hasSubsequence(t, sub)
