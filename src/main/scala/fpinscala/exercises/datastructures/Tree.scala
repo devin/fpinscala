@@ -8,7 +8,9 @@ enum Tree[+A]:
     case Leaf(_) => 1
     case Branch(l, r) => 1 + l.size + r.size
 
-  def depth: Int = ???
+  def depth: Int = this match
+    case Leaf(_) => 0
+    case Branch(l, r) => l.depth.max(r.depth) + 1
 
   def map[B](f: A => B): Tree[B] = ???
 
