@@ -60,4 +60,12 @@ object Option:
           case _ => None
     )
 
-  def traverse[A, B](as: List[A])(f: A => Option[B]): Option[List[B]] = ???
+  def traverse[A, B](as: List[A])(f: A => Option[B]): Option[List[B]] =
+    as.foldRight(Some(List.empty[B]))(
+      // this is map2?
+      (a: A, acc: Option[List[B]]) =>
+        (f(a), acc) match
+          case (Some(b), Some(acc)) => Some(b::acc)
+          case _ => None
+        )
+
