@@ -53,19 +53,10 @@ object Option:
 
   def sequence[A](as: List[Option[A]]): Option[List[A]] =
     as.foldRight(Some(List.empty[A]))(
-      // this is map2?
-      (oa: Option[A], acc: Option[List[A]]) =>
-        (oa, acc) match
-          case (Some(a), Some(acc)) => Some(a::acc)
-          case _ => None
+      (oa, acc) => map2(oa, acc) { _::_ }
     )
 
   def traverse[A, B](as: List[A])(f: A => Option[B]): Option[List[B]] =
     as.foldRight(Some(List.empty[B]))(
-      // this is map2?
-      (a: A, acc: Option[List[B]]) =>
-        (f(a), acc) match
-          case (Some(b), Some(acc)) => Some(b::acc)
-          case _ => None
-        )
-
+      (a, acc) => map2(f(a), acc) { _::_ }
+    )
