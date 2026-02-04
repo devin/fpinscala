@@ -27,9 +27,15 @@ enum Either[+E,+A]:
       case (_, Left(e)) => Left(e)
 
 object Either:
-  def traverse[E,A,B](es: List[A])(f: A => Either[E, B]): Either[E, List[B]] = ???
+  def traverse[E,A,B](es: List[A])(f: A => Either[E, B]): Either[E, List[B]] =
+    es.foldRight(Right(List.empty[B]) : Either[E, List[B]])(
+      (a, acc) => f(a).map2(acc) { _::_ }
+    )
 
-  def sequence[E,A](es: List[Either[E,A]]): Either[E,List[A]] = ???
+  def sequence[E,A](es: List[Either[E,A]]): Either[E,List[A]] =
+    es.foldRight(Right(List.empty[A]) : Either[E, List[A]])(
+      (e, acc) => e.map2(acc) { _::_ }
+    )
 
   def mean(xs: IndexedSeq[Double]): Either[String, Double] = 
     if xs.isEmpty then
