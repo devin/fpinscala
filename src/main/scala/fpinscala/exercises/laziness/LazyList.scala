@@ -21,9 +21,18 @@ enum LazyList[+A]:
     case Empty => None
     case Cons(h, t) => if (f(h())) Some(h()) else t().find(f)
 
-  def take(n: Int): LazyList[A] = ???
+  def take(n: Int): LazyList[A] =
+    if n <= 0 then Empty
+    else this match
+      case Empty => Empty
+      case Cons(h, t) => Cons(h, () => t().take(n-1))
 
-  def drop(n: Int): LazyList[A] = ???
+  @annotation.tailrec
+  final def drop(n: Int): LazyList[A] =
+    if n <= 0 then this
+    else this match
+      case Empty => Empty
+      case Cons(_, t) => t().drop(n-1)
 
   def takeWhile(p: A => Boolean): LazyList[A] = ???
 
