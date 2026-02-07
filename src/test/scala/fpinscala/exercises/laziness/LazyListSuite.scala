@@ -36,6 +36,10 @@ class LazyListSuite extends PropSuite:
     case n ** lazyList =>
       assertEquals(lazyList.drop(n).toList, lazyList.toList.drop(n))
 
+  test("LazyList.takeWhile")(genSmallInt ** genLazyList):
+    case n ** lazyList =>
+      assertEquals(lazyList.takeWhile(_ != n).toList, lazyList.toList.takeWhile(_ != n))
+
   test("LazyList.headOption")(genLazyList):
     case Empty      => assert(Empty.headOption.isEmpty)
     case Cons(h, t) => assert(Cons(h, t).headOption.contains(h()))
@@ -45,10 +49,6 @@ class LazyListSuite extends PropSuite:
   ): (smartConstructor, oldConstructor) =>
     assertEquals(smartConstructor.headOption, smartConstructor.headOption)
     assertNotEquals(oldConstructor.headOption, oldConstructor.headOption)
-
-  test("LazyList.takeWhile")(genSmallInt ** genLazyList):
-    case n ** lazyList =>
-      assertEquals(lazyList.takeWhile(_ != n).toList, lazyList.toList.takeWhile(_ != n))
 
   test("LazyList.forAll")(genSmallInt ** genLazyList):
     case n ** lazyList =>
