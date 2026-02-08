@@ -69,6 +69,11 @@ enum LazyList[+A]:
       f(a).append(bs)
     )
 
+  def pairwise[B, C](bs: LazyList[B], f: (A, B) => C): LazyList[C] =
+    (this, bs) match
+      case (Cons(a, at), Cons(b, bt)) => LazyList.cons(f(a(), b()), at().pairwise(bt(), f))
+      case _ => Empty
+
   def startsWith[B](s: LazyList[B]): Boolean = ???
 
 
@@ -90,7 +95,9 @@ object LazyList:
 
   def from(n: Int): LazyList[Int] = LazyList.cons(n, from(n+1))
 
-  lazy val fibs: LazyList[Int] = ???
+  lazy val fibs: LazyList[Int] =
+    lazy val tail: LazyList[Int] = LazyList.cons(1, fibs.pairwise(tail, _ + _))
+    LazyList.cons(0, tail)
 
   def unfold[A, S](state: S)(f: S => Option[(A, S)]): LazyList[A] = ???
 
