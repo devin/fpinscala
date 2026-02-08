@@ -104,10 +104,17 @@ object LazyList:
       case Some((a, s)) => LazyList.cons(a, unfold(s)(f))
       case _ => LazyList.empty
 
-  lazy val fibsViaUnfold: LazyList[Int] = ???
+  lazy val fibsViaUnfold: LazyList[Int] =
+    unfold((0, 1))(state =>
+      state match
+        case (c, n) => Some((c, (n, c + n)))
+    )
 
-  def fromViaUnfold(n: Int): LazyList[Int] = ???
+  def fromViaUnfold(n: Int): LazyList[Int] =
+    unfold(n)(n => Some(n, n + 1))
 
-  def continuallyViaUnfold[A](a: A): LazyList[A] = ???
+  def continuallyViaUnfold[A](a: A): LazyList[A] =
+    unfold(())(_ => Some(a, ()))
 
-  lazy val onesViaUnfold: LazyList[Int] = ???
+  lazy val onesViaUnfold: LazyList[Int] =
+    unfold(())(_ => Some(1, ()))
