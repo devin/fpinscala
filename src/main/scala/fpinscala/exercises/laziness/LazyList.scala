@@ -25,7 +25,7 @@ enum LazyList[+A]:
     if n <= 0 then Empty
     else this match
       case Empty => Empty
-      case Cons(h, t) => Cons(h, () => t().take(n-1))
+      case Cons(h, t) => LazyList.cons(h(), t().take(n-1))
 
   @annotation.tailrec
   final def drop(n: Int): LazyList[A] =
@@ -35,8 +35,8 @@ enum LazyList[+A]:
       case Cons(_, t) => t().drop(n-1)
 
   def takeWhile(p: A => Boolean): LazyList[A] =
-    foldRight(Empty: LazyList[A])((a, b) => if p(a) then
-      Cons(() => a, () => b)
+    foldRight(LazyList.empty[A])((a, b) => if p(a) then
+      LazyList.cons(a, b)
     else
       Empty
     )
@@ -51,23 +51,21 @@ enum LazyList[+A]:
   // writing your own function signatures.
 
   def map[B](f: A => B): LazyList[B] =
-    foldRight(Empty: LazyList[B])((a, bs) => Cons(() => f(a), () => bs))
-    // why does this fail?
-    //foldRight(Empty: LazyList[B])((a, bs) => cons(f(a), bs))
+    foldRight(LazyList.empty[B])((a, bs) => LazyList.cons(f(a), bs))
 
   def filter(f: A => Boolean): LazyList[A] =
-    foldRight(Empty: LazyList[A])((a, as) =>
+    foldRight(LazyList.empty[A])((a, as) =>
       if f(a) then
-        Cons(() => a, () => as)
+        LazyList.cons(a, as)
       else
         as
     )
 
   def append[A2 >: A](as: => LazyList[A2]): LazyList[A2] =
-    foldRight(as)((a, acc) => Cons(() => a, () => acc))
+    foldRight(as)((a, acc) => LazyList.cons(a, acc))
 
   def flatMap[B](f: A => LazyList[B]) =
-    foldRight(Empty: LazyList[B])((a, bs) =>
+    foldRight(LazyList.empty[B])((a, bs) =>
       f(a).append(bs)
     )
 
