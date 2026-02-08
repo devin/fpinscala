@@ -99,7 +99,10 @@ object LazyList:
     lazy val tail: LazyList[Int] = LazyList.cons(1, fibs.pairwise(tail, _ + _))
     LazyList.cons(0, tail)
 
-  def unfold[A, S](state: S)(f: S => Option[(A, S)]): LazyList[A] = ???
+  def unfold[A, S](state: S)(f: S => Option[(A, S)]): LazyList[A] =
+    f(state) match
+      case Some((a, s)) => LazyList.cons(a, unfold(s)(f))
+      case _ => LazyList.empty
 
   lazy val fibsViaUnfold: LazyList[Int] = ???
 
