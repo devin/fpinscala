@@ -22,10 +22,14 @@ enum LazyList[+A]:
     case Cons(h, t) => if (f(h())) Some(h()) else t().find(f)
 
   def take(n: Int): LazyList[A] =
-    if n <= 0 then Empty
-    else this match
-      case Empty => Empty
-      case Cons(h, t) => LazyList.cons(h(), t().take(n-1))
+    LazyList.unfold((n, this)) ((n, as) =>
+      (n, as) match
+        case (1, Cons(h, t)) =>
+          Some((h(), (0, Empty)))
+        case (n, Cons(h, t)) if n > 0 =>
+          Some((h(), (n-1, t())))
+        case _ => None
+    )
 
   @annotation.tailrec
   final def drop(n: Int): LazyList[A] =
@@ -35,10 +39,10 @@ enum LazyList[+A]:
       case Cons(_, t) => t().drop(n-1)
 
   def takeWhile(p: A => Boolean): LazyList[A] =
-    foldRight(LazyList.empty[A])((a, b) => if p(a) then
-      LazyList.cons(a, b)
-    else
-      Empty
+    LazyList.unfold(this)(as =>
+      as match
+        case Cons(h, t) if p(h()) => Some((h(), t()))
+        case _ => None
     )
 
   def forAll(p: A => Boolean): Boolean =
@@ -51,7 +55,11 @@ enum LazyList[+A]:
   // writing your own function signatures.
 
   def map[B](f: A => B): LazyList[B] =
-    foldRight(LazyList.empty[B])((a, bs) => LazyList.cons(f(a), bs))
+    LazyList.unfold(this)(bs =>
+      bs match
+        case Empty => None
+        case Cons(h, t) => Some((f(h()), t()))
+    )
 
   def filter(f: A => Boolean): LazyList[A] =
     foldRight(LazyList.empty[A])((a, as) =>
