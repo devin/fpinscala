@@ -103,6 +103,11 @@ enum LazyList[+A]:
       (oa, ob) => ob != None
     ).forAll(_ == _)
 
+  def tails: LazyList[LazyList[A]] =
+    LazyList.unfold(this)(as => as match
+      case Empty => None
+      case Cons(h, t) => Some(Cons(h, t), t())
+    ).append(LazyList(LazyList.empty))
 
 object LazyList:
   def cons[A](hd: => A, tl: => LazyList[A]): LazyList[A] = 
