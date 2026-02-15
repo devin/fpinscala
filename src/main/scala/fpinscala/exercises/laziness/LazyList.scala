@@ -98,6 +98,12 @@ enum LazyList[+A]:
             Some((Some(ah()), Some(bh())), (at(), bt()))
     )
 
+  def startsWith[B](s: LazyList[B]): Boolean =
+    this.zipAll(s).takeWhile(
+      (oa, ob) => ob != None
+    ).forAll(_ == _)
+
+
 object LazyList:
   def cons[A](hd: => A, tl: => LazyList[A]): LazyList[A] = 
     lazy val head = hd
