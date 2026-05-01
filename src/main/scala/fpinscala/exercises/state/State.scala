@@ -56,7 +56,26 @@ object RNG:
     val (d3, rng4) = double(rng3)
     ((d1, d2, d3), rng4)
 
-  def ints(count: Int)(rng: RNG): (List[Int], RNG) = ???
+  def ints(count: Int)(rng: RNG): (List[Int], RNG) =
+    @annotation.tailrec
+    def go(count: Int, r: RNG, acc: List[Int]): (List[Int], RNG) =
+      if count <= 0 then
+        (acc, r)
+      else
+        val (n, r2) = r.nextInt
+        go(count-1, r2, n :: acc)
+
+    go(count, rng, Nil)
+
+// Normal recursive stack overflows.
+//  def ints(count: Int)(rng: RNG): (List[Int], RNG) =
+//    val (n, rng2) = rng.nextInt
+//
+//    if count == 0 then
+//      (Nil, rng2)
+//    else
+//      val (l, rng3) = ints(count-1)(rng2)
+//      (n :: l, rng3)
 
   def map2[A, B, C](ra: Rand[A], rb: Rand[B])(f: (A, B) => C): Rand[C] = ???
 
