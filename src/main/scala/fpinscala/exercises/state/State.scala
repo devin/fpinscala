@@ -55,34 +55,37 @@ object RNG:
     val (d3, rng4) = double(rng3)
     ((d1, d2, d3), rng4)
 
-  def ints(count: Int)(rng: RNG): (List[Int], RNG) =
-    @annotation.tailrec
-    def go(count: Int, r: RNG, acc: List[Int]): (List[Int], RNG) =
-      if count <= 0 then
-        (acc, r)
-      else
-        val (n, r2) = r.nextInt
-        go(count-1, r2, n :: acc)
-
-    go(count, rng, Nil)
-
-// Normal recursive stack overflows.
-//  def ints(count: Int)(rng: RNG): (List[Int], RNG) =
-//    val (n, rng2) = rng.nextInt
-//
-//    if count == 0 then
-//      (Nil, rng2)
-//    else
-//      val (l, rng3) = ints(count-1)(rng2)
-//      (n :: l, rng3)
-
   def map2[A, B, C](ra: Rand[A], rb: Rand[B])(f: (A, B) => C): Rand[C] =
     rng =>
       val (a, rng2) = ra(rng)
       val (b, rng3) = rb(rng2)
       (f(a, b), rng3)
 
-  def sequence[A](rs: List[Rand[A]]): Rand[List[A]] = ???
+  def sequence[A](rs: List[Rand[A]]): Rand[List[A]] =
+    rng =>
+      @annotation.tailrec
+      def go(rs: List[Rand[A]], r: RNG, acc: List[A]): (List[A], RNG) =
+        rs match {
+          case Nil => (acc, r)
+          case head :: tail =>
+            val (h, r2) = head(r)
+            go(tail, r2, h :: acc)
+        }
+
+      go(rs, rng, Nil)
+
+    // Normal recursive will stack overflow.
+//    rng =>
+//      rs match {
+//        case Nil => (Nil, rng)
+//        case head :: tail => 
+//          val (a, rng2) = head(rng)
+//          val (as, rng3) = sequence(tail)(rng2)
+//          (a :: as, rng3)
+//      }
+
+  def ints(count: Int)(rng: RNG): (List[Int], RNG) =
+    sequence(List.fill(count)(int))(rng)
 
   def flatMap[A, B](r: Rand[A])(f: A => Rand[B]): Rand[B] = ???
 
